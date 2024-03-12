@@ -23,11 +23,9 @@ SSIM measures the similarity between two images. It considers three components: 
 ### Bias
 Bias indicates the systematic error in predictions, showing whether the model tends to overestimate or underestimate the true values. It is computed as the mean difference between predicted and true values. A bias close to zero suggests balanced predictions, while a significant bias indicates a systematic tendency in the model's predictions.
 
-These metrics provide insights into the performance of the super-resolution model, helping to assess its accuracy and reliability.
-
 ## List of Dependencies
-- Python
-- TensorFlow
+- Python version: 3.10.5
+- TensorFlow version: 2.8.0
 
 ## Citations and Links
 (To be filled)

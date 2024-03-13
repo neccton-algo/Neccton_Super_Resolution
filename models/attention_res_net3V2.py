@@ -18,12 +18,7 @@ class Att_Res_UNet():
         self.n_targets = len(list_targets)
         self.weight_regularizer = None ## A implementer eventuellement ...
         self.repeat_elem_counter = -1
-        self.mask = np.load('/mnt/redda-ns2993k/Antoine/Betzy/data/residuals/tp5mask.npy')
-        self.mask = np.vstack((self.mask,np.ones((8, 800))))
-        self.mask = 1 - self.mask
-        self.mask = tf.convert_to_tensor(self.mask, dtype=tf.float16)
-        # Make the mask of dimension (1,768,800,1)
-        self.mask = tf.expand_dims(tf.expand_dims(self.mask, axis=0), axis=-1)
+
     #
     def repeat_elem(self, tensor, rep, name=None):
         self.repeat_elem_counter += 1
@@ -58,8 +53,6 @@ class Att_Res_UNet():
         shape_sigmoid = tf.keras.backend.int_shape(sigmoid_xg)
         #
         upsample_psi = tf.keras.layers.UpSampling2D(size = (shape_x[1] // shape_sigmoid[1], shape_x[2] // shape_sigmoid[2]))(sigmoid_xg)
-        if self.repeat_elem_counter == 4:
-            upsample_psi[self.mask] = 0
         upsample_psi = self.repeat_elem(upsample_psi, shape_x[3], name ='Attention_weights')
         y = tf.keras.layers.multiply([upsample_psi, x])
         #

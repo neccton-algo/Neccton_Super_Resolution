@@ -18,7 +18,37 @@ class Att_Res_UNet():
         self.n_targets = len(list_targets)
         self.weight_regularizer = None ## A implementer eventuellement ...
         self.repeat_elem_counter = -1
+    #
+#        conv = self.partial_conv(n_filters, kernel_size = (3,3), padding = padding, kernel_initializer = self.kernel_initializer)(x)
+    def partial_conv(self, x, n_filters, kernel_size, use_bias=True, padding="same"):
+        if padding.lower() == 'SAME'.lower():
+            slide_window = kernel_size * kernel_size
 
+            update_mask = tf.keras.layers.Conv2D(filters=1,
+                                           kernel_size=kernel_size, kernel_initializer=tf.keras.initializers.Constant(1.0),
+                                           padding=padding, use_bias=False, trainable=False)(self.mask)
+
+            mask_ratio = slide_window / (update_mask + 1e-8)
+            update_mask = tf.clip_by_value(update_mask, 0.0, 1.0)
+            mask_ratio = mask_ratio * update_mask
+
+            x = tf.keras.layers.Conv2D(filters=n_filters,
+                                 kernel_size=kernel_size, kernel_initializer=self.kernel_initializer,
+                                 kernel_regularizer=self.weight_regularizer,
+                                 padding=padding, use_bias=False)(x)
+            x = x * mask_ratio
+            
+            if use_bias:
+                bias = tf.Variable(tf.zeros(shape=(1, 1, 1, n_filters), dtype=tf.float16), trainable=True)
+                x = tf.keras.layers.Add()([x, bias])
+                #x = x * update_mask
+        else:
+            x = tf.keras.layers.Conv2D(filters=n_filters,
+                                 kernel_size=kernel_size, kernel_initializer=self.kernel_initializer,
+                                 kernel_regularizer=self.weight_regularizer,
+                                 padding=padding, use_bias=use_bias)(x)
+
+        return (x)
     #
     def repeat_elem(self, tensor, rep, name=None):
         self.repeat_elem_counter += 1
@@ -80,6 +110,25 @@ class Att_Res_UNet():
         #
         return(res_path)
     #
+    def partial_residual_conv_block(self, x, n_filters, padding = "same"):
+        conv = self.partial_conv(x, n_filters, kernel_size = 3, padding = padding)
+        if self.batch_norm == True:
+            conv = tf.keras.layers.BatchNormalization(axis = 3)(conv)
+        conv = tf.keras.layers.Activation(self.activation)(conv)
+        #
+        conv = self.partial_conv(conv, n_filters, kernel_size = 3, padding = padding)
+        if self.batch_norm == True:
+            conv = tf.keras.layers.BatchNormalization(axis = 3)(conv)
+        #
+        shortcut = tf.keras.layers.Conv2D(n_filters, kernel_size = (1,1), padding = padding)(x)
+        if self.batch_norm == True:
+            shortcut = tf.keras.layers.BatchNormalization(axis = 3)(shortcut)
+        #
+        res_path = tf.keras.layers.add([shortcut, conv])
+        res_path = tf.keras.layers.Activation(self.activation)(res_path)
+        #
+        return(res_path)
+    #
     def downsample_block(self, x, n_filters, pool_size = (2,2), strides = 2):
         f = self.residual_conv_block(x, n_filters)
         #
@@ -90,12 +139,22 @@ class Att_Res_UNet():
         #
         p = tf.keras.layers.Dropout(self.dropout)(p)
         return(f, p)
+    def partial_downsample_block(self, x, n_filters, pool_size = (2,2), strides = 2):
+        f = self.partial_residual_conv_block(x, n_filters)
+        #
+        if self.pooling_type == "Max":
+            p = tf.keras.layers.MaxPool2D(pool_size = pool_size, strides = strides)(f)
+            self.mask = tf.keras.layers.MaxPool2D(pool_size = pool_size, strides = strides)(self.mask)
+        elif self.pooling_type == "Average":
+            p = tf.keras.layers.AveragePooling2D(pool_size = pool_size, strides = strides)(f)
+            self.mask = tf.keras.layers.AveragePooling2D(pool_size = pool_size, strides = strides)(self.mask)
+        #
+        p = tf.keras.layers.Dropout(self.dropout)(p)
+        return(f, p)  
     #
     def upsample_block(self, x, conv_features, n_filters, kernel_size = (2,2), strides = 2, padding = "same"):
-        gating = self.gating_signal(x, n_filters)
-        att = self.attention_block(conv_features, gating, n_filters)
         up_att = tf.keras.layers.UpSampling2D(size = (2, 2), data_format = "channels_last")(x)
-        up_att = tf.keras.layers.concatenate([up_att, att], axis = 3)
+        up_att = tf.keras.layers.concatenate([up_att, conv_features], axis = 3)
         up_conv = self.residual_conv_block(up_att, n_filters)
         return(up_conv)
     #

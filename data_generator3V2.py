@@ -21,17 +21,13 @@ tf.keras.utils.set_random_seed(1234)
 
 
 class Data_generator(tf.keras.utils.Sequence):
-    def __init__(self, list_predictors, list_labels, list_dates, standard_forcings, standard_res, standard_LR_upsampled, standard_bathy, standard_ssh_LR_upsampled, batch_size, path_forcings, path_data_res, path_data_LR_upsampled, dim, cropped_dim, shuffle, res_normalization):
+    def __init__(self, list_predictors, list_labels, list_dates, standard_res, standard_LR_upsampled, batch_size, path_data_res, path_data_LR_upsampled, dim, cropped_dim, shuffle, res_normalization):
         self.list_predictors = list_predictors
         self.list_labels = list_labels
         self.list_dates = list_dates
-        self.standard_forcings = standard_forcings
         self.standard_res = standard_res
         self.standard_LR_upsampled = standard_LR_upsampled
-        self.standard_bathy = standard_bathy
-        self.standard_ssh_LR_upsampled = standard_ssh_LR_upsampled
         self.batch_size = batch_size
-        self.path_forcings = path_forcings
         self.path_data_res = path_data_res
         self.path_data_LR_upsampled = path_data_LR_upsampled
         self.HR_dim = dim
@@ -114,13 +110,6 @@ class Data_generator(tf.keras.utils.Sequence):
                 norm_data = var_data
             else:
                 norm_data = (var_data - self.standard_LR_upsampled[var_name][layer]["min"]) / (self.standard_LR_upsampled[var_name][layer]["max"] - self.standard_LR_upsampled[var_name][layer]["min"])
-        elif resolution == 'tp5_bathy':
-            norm_data = (var_data - self.standard_bathy[var_name][layer]["min"]) / (self.standard_bathy[var_name][layer]["max"] - self.standard_bathy[var_name][layer]["min"])
-        elif resolution == 'ssh':
-            norm_data = (var_data - self.standard_ssh_LR_upsampled[var_name][layer]["min"]) / (self.standard_ssh_LR_upsampled[var_name][layer]["max"] - self.standard_ssh_LR_upsampled[var_name][layer]["min"])
-        elif resolution == 'forcings':
-            norm_data = (var_data - self.standard_forcings[var_name][0]["min"]) / (self.standard_forcings[var_name][0]["max"] - self.standard_forcings[var_name][0]["min"])
-        return(norm_data)
     
     def denormalize(self, var_name, layer, var_data,clip=False,vmin=0,vmax=100):
         if resolution == 'res':
@@ -199,60 +188,6 @@ class Data_generator(tf.keras.utils.Sequence):
                     X[i,:,:,v] = var_data
                 elif var_name == 'tp5_mask': # We put a 0 on the land and a 1 on the ocean
                     X[i,:,:,v] = np.vstack((1-tp5_mask, zeropadHR)) 
-                elif var_name == 'iceumask': # We put a 0 on the ice and a 1 on the ocean
-                    nc_file = Dataset(os.path.join(self.path_data_LR_upsampled,f"iced.{date_ID}_00_0000.nc"), 'r')
-                    var_data =  nc_file.variables[var_name][:].data
-                    nc_file.close()
-                    var_data = np.where(var_data > 0, 0, 1)
-                    var_data = np.vstack((1-var_data, 1+zeropadHR))
-                    X[i,:,:,v] = var_data                 
-                elif var_name == 'tp5_bathy':
-                    file_ID = os.path.join(self.path_data_res,"depth_TP5a0.06_05.a")
-                    ab_file = abfile.ABFileBathy(file_ID,"r",idm=self.HR_dim[1],jdm=self.HR_dim[0])
-                    var_data=ab_file.read_field("depth").data
-                    ab_file.close()
-                    var_data = self.normalize("depth", 1, var_data,'tp5_bathy')
-                    var_data[mask_indices_tp5] = 0 # Put the mask at 0
-                    var_data = np.vstack((var_data, zeropadHR))
-                    X[i,:,:,v] = np.vstack((tp5_mask, zeropadHR))
-                elif var_name == 'tp5_lat':
-                    file_ID = os.path.join(self.path_data_res,"regional.grid.a")
-                    ab_file = abfile.ABFileGrid(file_ID,"r")
-                    var_data=ab_file.read_field("plat").data
-                    ab_file.close()
-                    var_data[mask_indices_tp5] = 0 # Put the mask at 0
-                    var_data = np.vstack((var_data, zeropadHR))
-                    X[i,:,:,v] = np.vstack((tp5_mask, zeropadHR))
-                elif var_name == 'ssh_upsampled':
-                    nc_file = Dataset(os.path.join(self.path_data_LR_upsampled,f"ssh.{date_ID}_00_0000.nc"), 'r')
-                    var_data =  nc_file.variables['ssh'][:].data
-                    nc_file.close()
-                    var_data = self.normalize('ssh', 0, var_data,'ssh')
-                    var_data[mask_indices_tp5] = 0 # Put the mask at 0
-                    var_data = np.vstack((var_data, zeropadHR))
-                    X[i,:,:,v] = var_data
-                elif var_name == 'aicenSumMask': # We put a 0 on the ice and a 1 on the ocean
-                    # NB : no normalization as it is a already a concentration between 0 and 1
-                    nc_file = Dataset(os.path.join(self.path_data_LR_upsampled,f"iced.{date_ID}_00_0000.nc"), 'r')
-                    var_data = nc_file.variables['aicen'][0,:].data
-                    for cat_number in range(1,5):
-                        tmp = nc_file.variables['aicen'][cat_number,:].data
-                        var_data += tmp
-                    nc_file.close()
-                    var_data = np.where(var_data > 0, 0, 1)
-                    var_data = np.vstack((var_data, 1+zeropadHR))
-                    X[i,:,:,v] = var_data
-                elif var_name == 'aicenSumMask015': # We put a 0 on the ice and a 1 on the ocean
-                    # NB : no normalization as it is a already a concentration between 0 and 1
-                    nc_file = Dataset(os.path.join(self.path_data_LR_upsampled,f"iced.{date_ID}_00_0000.nc"), 'r')
-                    var_data = nc_file.variables['aicen'][0,:].data
-                    for cat_number in range(1,5):
-                        tmp = nc_file.variables['aicen'][cat_number,:].data
-                        var_data += tmp
-                    nc_file.close()
-                    var_data = np.where(var_data > 0.15, 0, 1)
-                    var_data = np.vstack((var_data, 1+zeropadHR))
-                    X[i,:,:,v] = var_data
                 elif var_name in self.BGC_variables:
                     file_ID = os.path.join(self.path_data_LR_upsampled,f"restart.{date_ID}_00_0000.a")
                     ab_file = abfile.ABFileRestart(file_ID,"r",idm=self.HR_dim[1],jdm=self.HR_dim[0])
@@ -321,15 +256,6 @@ class Data_generator(tf.keras.utils.Sequence):
                     var_data[mask_indices_tp5] = 0 # Put the mask at 0
                     var_data = np.vstack((var_data, zeropadHR))
                     y[i,:,:,v] = var_data
-                elif var_name == 'iceumask':
-                    nc_file = Dataset(os.path.join(self.path_data_res,f"iced.{date_ID}_00_0000.nc"), 'r')
-                    var_data =  nc_file.variables[var_name][:].data
-                    nc_file.close()
-                    var_data = np.where((var_data < 0.1) & (var_data >-0.1), 0, var_data)
-                    var_data = np.where(var_data > 0.1, 1, var_data)
-                    var_data = np.where(var_data < -0.1, -1, var_data)
-                    var_data = np.vstack((var_data, zeropadHR))
-                    X[i,:,:,v] = var_data
                 elif var_name in self.BGC_variables:
                     file_ID = os.path.join(self.path_data_res,f"restart.{date_ID}_00_0000.a")
                     ab_file = abfile.ABFileRestart(file_ID,"r",idm=self.HR_dim[1],jdm=self.HR_dim[0])

@@ -2,6 +2,10 @@
 
 Super Resolution for the NECCTON project
 
+# Usage
+
+Open Test_ResUnet.ipynb and run all the cells
+
 ## Data Source
 
 TOPAZ sea surface temperature and neural network weights are available through FTP (details provided in the code).

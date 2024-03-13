@@ -26,7 +26,8 @@ Bias indicates the systematic error in predictions, showing whether the model te
 ## List of Dependencies
 - Python version: 3.10.5
 - TensorFlow version: 2.8.0
-- abfile module (link to it in the code)
+- abfile module (available in this repo)
+- netCDF4 version: 1.5.8
 
 ## Citations and Links
 (To be filled)

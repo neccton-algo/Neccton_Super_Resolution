@@ -110,7 +110,8 @@ class Data_generator(tf.keras.utils.Sequence):
                 norm_data = var_data
             else:
                 norm_data = (var_data - self.standard_LR_upsampled[var_name][layer]["min"]) / (self.standard_LR_upsampled[var_name][layer]["max"] - self.standard_LR_upsampled[var_name][layer]["min"])
-    
+        return(norm_data)
+        
     def denormalize(self, var_name, layer, var_data,clip=False,vmin=0,vmax=100):
         if resolution == 'res':
             denorm_data = var_data * (self.standard_res[var_name][layer]["max"] - self.standard_res[var_name][layer]["min"]) + self.standard_res[var_name][layer]["min"]

@@ -8,7 +8,15 @@ Open Test_ResUnet.ipynb and run all the cells
 
 ## Data Source
 
-TOPAZ sea surface temperature and neural network weights are available through FTP (details provided in the code).
+The data required to run the Notebook are:
+
+- High resolution fields (for validation)
+- Low resolution field upsampled to the the HR grid as an input of the neural network
+- The High resolution land mask
+- The weights of the NN
+
+The HR and LR field result from a run from the Topaz 5 and Topaz 2 data assimilation system respectively, which relies on a coupled sea-ice / ocean over the Arctic and the North Atlantic.
+They are available through FTP (details provided in the code). For now, only the Sea Surface Temperature variable is available.
 
 ## Baseline
 

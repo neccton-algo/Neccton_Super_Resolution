@@ -7,7 +7,7 @@ To do so, the Neural Network computes the residuals it needs to add to a bilinea
 
 # Usage
 
-Open Test_ResUnet.ipynb and run all the cells [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AntoineBernigaud/Neccton_Super_Resolution/blob/main/Test_ResUnet.ipynb)
+To run the super resolution algorithm and compare the result to a bsaline, open Test_ResUnet.ipynb and run all the cells [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AntoineBernigaud/Neccton_Super_Resolution/blob/main/Test_ResUnet.ipynb)
 
 ## Data Source
 

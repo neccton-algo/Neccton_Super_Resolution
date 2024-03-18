@@ -1,6 +1,9 @@
 # Neccton_Super_Resolution
 
-Super Resolution for the NECCTON project
+Super Resolution for the NECCTON project.
+A Neural Network allows to go from a low resolution field to a high resolution field to do data assimilation in the HR space, to then go back
+in the LR dimension to run a LR model.
+To do so, the Neural Network computes the residuals it needs to add to a bilinear upsampling of the LR field to get the true HR field.
 
 # Usage
 

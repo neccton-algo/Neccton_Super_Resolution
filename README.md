@@ -4,7 +4,7 @@ Super Resolution for the NECCTON project
 
 # Usage
 
-Open Test_ResUnet.ipynb and run all the cells
+Open Test_ResUnet.ipynb and run all the cells [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AntoineBernigaud/Neccton_Super_Resolution/blob/main/Test_ResUnet.ipynb)
 
 ## Data Source
 

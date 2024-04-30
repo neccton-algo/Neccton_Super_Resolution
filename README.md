@@ -1,3 +1,6 @@
+# This is a demo repository for the NECCTON project 
+showing a template for what a repo should contain and can look like
+
 # Neccton_Super_Resolution
 
 Super Resolution for the NECCTON project.

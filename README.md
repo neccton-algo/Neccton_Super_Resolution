@@ -1,12 +1,26 @@
-# This is a demo repository for the NECCTON project 
-showing a template for what a repo should contain and can look like
+# Super Resolution Data Assimilation
 
-# Neccton_Super_Resolution
+This repo contains the Super Resolution Data Assimilation algorithm for the NECCTON project. It contains a notebook illustrating the super-resolution for a specific date and giving some metrics to compare againt the truth and a baseline (bilinear upsampling).
 
-Super Resolution for the NECCTON project.
+  #### Description : 
 A Neural Network allows to go from a low resolution field to a high resolution field to do data assimilation in the HR space, to then go back
-in the LR dimension to run a LR model.
-To do so, the Neural Network computes the residuals it needs to add to a bilinear upsampling of the LR field to get the true HR field.
+in the LR dimension to run a LR model. To do so, the Neural Network computes the residuals it needs to add to a bilinear upsampling of the LR field to get the true HR field.
+
+Once this NN is trained, the full algorithm follows this diagram:
+![My Image](./SRDA_diagram.png)
+
+The notebook given only illustrates Step 2. Indeed this work was developed for the specific application of running the TOPAZ data assimilation system, which is based on the coupling of HYCOM-CICE and ECOSMO (for the BGC)
+- https://github.com/nansencenter/NERSC-HYCOM-CICE/tree/develop (HYCOM-CICE)
+- git clone https://github.com/pmlmodelling/ersem.git (carbon module)
+- https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2 (EnKF)
+
+We also include the upsampling and downsampling algorithm. There are specific to the TOPAZ system as well. Their purpose is to upsample , in our case ...
+Assuming a model and data assimilation scheme are operational, the scripts that connects the different steps is named Full_inference.sh. It consists in:
+- upsamling
+- applying the SR operator
+- assembling the results (specific step for the binary .ab file format)
+
+Then the script downsample_back_to_TP2.sh is doing the Step 4.
 
 # Usage
 

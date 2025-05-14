@@ -11,7 +11,7 @@ Once this NN is trained, the full algorithm follows this diagram:
 
 The notebook given only illustrates Step 2. Indeed this work was developed for the specific application of running the TOPAZ data assimilation system, which is based on the coupling of HYCOM-CICE and ECOSMO (for the BGC)
 - https://github.com/nansencenter/NERSC-HYCOM-CICE/tree/develop (HYCOM-CICE)
-- git clone https://github.com/pmlmodelling/ersem.git (carbon module)
+- https://github.com/pmlmodelling/ersem.git (carbon module)
 - https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2 (EnKF)
 
 We also include the upsampling and downsampling algorithm in interpolation.py. There are specific to the TOPAZ system as well. Their purpose is to map a HR (respectively LR) variable to the LR (respectively HR) grid. Because

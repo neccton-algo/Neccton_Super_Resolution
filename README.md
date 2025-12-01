@@ -1,13 +1,49 @@
-# Neccton_Super_Resolution
+# Super Resolution Data Assimilation
 
-Super Resolution for the NECCTON project.
+This repo contains the Super Resolution Data Assimilation algorithm for the NECCTON project. It contains a notebook illustrating the super-resolution for a specific date and giving some metrics to compare againt the truth and a baseline (bilinear upsampling).
+
+  #### Description : 
 A Neural Network allows to go from a low resolution field to a high resolution field to do data assimilation in the HR space, to then go back
-in the LR dimension to run a LR model.
-To do so, the Neural Network computes the residuals it needs to add to a bilinear upsampling of the LR field to get the true HR field.
+in the LR dimension to run a LR model. To do so, the Neural Network computes the residuals it needs to add to a bilinear upsampling of the LR field to get the true HR field.
+
+Once this NN is trained, the full algorithm follows this diagram:
+![My Image](./SRDA_diagram.png)
+
+The notebook given only illustrates Step 2. Indeed this work was developed for the specific application of running the TOPAZ data assimilation system, which is based on the coupling of HYCOM-CICE and ECOSMO (for the BGC)
+- https://github.com/nansencenter/NERSC-HYCOM-CICE/tree/develop (HYCOM-CICE)
+- https://github.com/pmlmodelling/ersem.git (carbon module)
+- https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2 (EnKF)
+
+We also include the upsampling and downsampling algorithm in interpolation.py. There are specific to the TOPAZ system as well. Their purpose is to map a HR (respectively LR) variable to the LR (respectively HR) grid. Because
+the land masks in HR and LR are not mere interpolation from one another, it requires special attention to map points that become water after interpolation but should be land and conversely. Similarly, specific methods are applied
+to handle the difference in bathymetry and have the sum of the width of the vertical layers reach exactly the bottom of the ocean.
+
+Assuming a model and data assimilation scheme are operational, the scripts that connects the different steps is named Full_inference.sh. It consists in:
+- upsamling
+- applying the SR operator
+- assembling the results (specific step for the binary .ab file format)
+
+Then the script downsample_back_to_TP2.sh is doing the Step 4.
 
 # Usage
 
 To run the super resolution algorithm and compare the result to a bsaline, open Test_ResUnet.ipynb and run all the cells [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/neccton-algo/Neccton_Super_Resolution/blob/main/Test_ResUnet.ipynb)
+
+## Training
+
+The training was done on the super computer Lumi. The code is in training3V201_auto.py which is called by job_auto.sh, itself called by submit_job_auto.sh which is the job that is submit to the queue.
+The list of variables to super resolve as well as the layers are specified in job_auto.sh.
+
+To create consistant pairs of training image we followed this method:
+![My Image](./Training_procedure.png)
+
+A long continuous run in HR is first done. Then every week, the output is downsampled (with the algorithm in interpolation.py) to the LR model grid. This LR model runs for 1 week from this initial conditions. At the end of the week we get 1 pair of matching HR and LR data.
+Note that 1 week is chosen, among other reasons, between the assimilation window of TOPAZ is also of 1 week.
+
+#### Choice of predictors
+
+to predict the layer N of some variable, we always have at least as predictors the LR variable at layers N-1, N and N+1 (except for the first and final layers). This is enough for most variables. There is one trained network per variable et per layer.
+The choices of supplementary predictors are variable dependant, for instance to predict the layer depth dp, we also use temperature and salinity.
 
 ## Data Source
 

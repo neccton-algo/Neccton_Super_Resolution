@@ -1,6 +1,6 @@
 # Super Resolution Data Assimilation
 
-This repo contains the Super Resolution Data Assimilation algorithm for the NECCTON project. It contains a notebook illustrating the super-resolution for a specific date and giving some metrics to compare againt the truth and a baseline (bilinear upsampling).
+This repo contains the Super Resolution Data Assimilation algorithm for the NECCTON project. It contains a notebook illustrating the super-resolution for a specific date and giving some metrics to compare against the truth and a baseline (bilinear upsampling).
 
   #### Description : 
 A Neural Network allows to go from a low resolution field to a high resolution field to do data assimilation in the HR space, to then go back

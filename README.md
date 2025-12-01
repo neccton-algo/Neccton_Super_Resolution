@@ -14,16 +14,16 @@ The notebook given only illustrates Step 2. Indeed this work was developed for t
 - https://github.com/pmlmodelling/ersem.git (carbon module)
 - https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2 (EnKF)
 
-We also include the upsampling and downsampling algorithm in interpolation.py. There are specific to the TOPAZ system as well. Their purpose is to map a HR (respectively LR) variable to the LR (respectively HR) grid. Because
+We also include the upsampling and downsampling algorithm in interpolation.py. Theey are specific to the TOPAZ system as well. Their purpose is to map a HR (respectively LR) variable to the LR (respectively HR) grid. Because
 the land masks in HR and LR are not mere interpolation from one another, it requires special attention to map points that become water after interpolation but should be land and conversely. Similarly, specific methods are applied
-to handle the difference in bathymetry and have the sum of the width of the vertical layers reach exactly the bottom of the ocean.
+to handle the difference in bathymetry and have the sum of the width of the vertical layers ("dp") reach exactly the bottom of the ocean.
 
 Assuming a model and data assimilation scheme are operational, the scripts that connects the different steps is named Full_inference.sh. It consists in:
 - upsamling
 - applying the SR operator
 - assembling the results (specific step for the binary .ab file format)
 
-Then the script downsample_back_to_TP2.sh is doing the Step 4.
+Then the script SRDA/downsample_back_to_TP2.sh is doing the Step 4.
 
 # Usage
 
@@ -32,7 +32,7 @@ To run the super resolution algorithm and compare the result to a bsaline, open 
 
 ## Training
 
-The training was done on the super computer Lumi. The code is in training3V201_auto.py which is called by job_auto.sh, itself called by submit_job_auto.sh which is the job that is submit to the queue.
+The training was done on the super computer Lumi. The code is in training/training3V201_auto.py which is called by job_auto.sh, itself called by submit_job_auto.sh which is the job that is submitted to the queue.
 The list of variables to super resolve as well as the layers are specified in job_auto.sh.
 
 To create consistant pairs of training image we followed this method:
@@ -43,8 +43,7 @@ Note that 1 week is chosen, among other reasons, between the assimilation window
 
 #### Choice of predictors
 
-to predict the layer N of some variable, we always have at least as predictors the LR variable at layers N-1, N and N+1 (except for the first and final layers). This is enough for most variables. There is one trained network per variable et per layer.
-The choices of supplementary predictors are variable dependant, for instance to predict the layer depth dp, we also use temperature and salinity.
+to predict the layer N of some variable, we use as predictors the LR variable at layers N-1, N and N+1 (except for the first and final layers, and for the super resolution of the "dp","u" and "v" variables, see training/submit_job_auto.sh). There is one trained network per variable and per layer.
 
 ## Data Source
 

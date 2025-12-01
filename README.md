@@ -14,20 +14,16 @@ The notebook given only illustrates Step 2. Indeed this work was developed for t
 - https://github.com/pmlmodelling/ersem.git (carbon module)
 - https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2 (EnKF)
 
-We also include the upsampling and downsampling algorithm in interpolation.py. Theey are specific to the TOPAZ system as well. Their purpose is to map a HR (respectively LR) variable to the LR (respectively HR) grid. Because
+We also include the upsampling and downsampling algorithm in interpolation.py. They are specific to the TOPAZ system as well. Their purpose is to map a HR (respectively LR) variable to the LR (respectively HR) grid. Because
 the land masks in HR and LR are not mere interpolation from one another, it requires special attention to map points that become water after interpolation but should be land and conversely. Similarly, specific methods are applied
 to handle the difference in bathymetry and have the sum of the width of the vertical layers ("dp") reach exactly the bottom of the ocean.
 
-Assuming a model and data assimilation scheme are operational, the scripts that connects the different steps is named Full_inference.sh. It consists in:
-- upsamling
-- applying the SR operator
-- assembling the results (specific step for the binary .ab file format)
-
-Then the script SRDA/downsample_back_to_TP2.sh is doing the Step 4.
+SRDA/Full_inference.sh is the script calling all the steps of the SRDA algorithm: upsampling, super-resolution, assembling of the files and downsampling. In TOPAZ, fields use a .ab binary format (see the included "abfile" package). Inference.py is designed to super-resolve the 50 layers of a given variable in parallel. They are 
+then assembled into a single file by assembling.py. The downsampling (Step 4) is made in SRDA/downsample_back_to_TP2.sh.
 
 # Usage
 
-To run the super resolution algorithm and compare the result to a bsaline, open Test_ResUnet.ipynb and run all the cells [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AntoineBernigaud/Neccton_Super_Resolution/blob/main/Test_ResUnet.ipynb). Recommanded: run it on EDITO [(Link)](https://dive.edito.eu/training?search=SRDA&path=%5B%5D) to avoid downloading the network weights and the fields.
+To run the super resolution algorithm and compare the result to a baseline, open Test_ResUnet.ipynb and run all the cells [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AntoineBernigaud/Neccton_Super_Resolution/blob/main/Test_ResUnet.ipynb). Recommanded: run it on EDITO [(Link)](https://dive.edito.eu/training?search=SRDA&path=%5B%5D) to avoid downloading the network weights and the fields.
 
 
 ## Training

@@ -27,7 +27,8 @@ Then the script downsample_back_to_TP2.sh is doing the Step 4.
 
 # Usage
 
-To run the super resolution algorithm and compare the result to a bsaline, open Test_ResUnet.ipynb and run all the cells [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AntoineBernigaud/Neccton_Super_Resolution/blob/main/Test_ResUnet.ipynb)
+To run the super resolution algorithm and compare the result to a bsaline, open Test_ResUnet.ipynb and run all the cells [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AntoineBernigaud/Neccton_Super_Resolution/blob/main/Test_ResUnet.ipynb). Recommanded: run it on EDITO [(Link)](https://dive.edito.eu/training?search=SRDA&path=%5B%5D) to avoid downloading the network weights and the fields.
+
 
 ## Training
 
